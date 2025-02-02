@@ -1,13 +1,24 @@
-// import React from "react";
 import { Link } from "react-router-dom";
+import { Form, Button, Container } from "react-bootstrap";
+
 export default function Signup() {
     return (
-    <div id="wd-signup-screen">
-        <h3>Sign up</h3>
-        <input placeholder="username" className="wd-username" /><br/>
-        <input placeholder="password" type="password" className="wd-password" /><br/>
-        <input placeholder="verify password" type="password" className="wd-password-verify" /><br/>
-        <Link  to="/Kambaz/Account/Profile" > Sign up </Link><br />
-        <Link  to="/Kambaz/Account/Signin" >Sign in</Link>
-    </div>
-);}
+        <Container className="d-flex justify-content-center mt-5">
+            <div className="w-25">
+                <h2 className="text-center">Signup</h2>
+                <Form>
+                    <Form.Group className="mb-3">
+                        <Form.Control type="text" placeholder="username" />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Control type="password" placeholder="password" />
+                    </Form.Group>
+                    <Button variant="primary" className="w-100">Signin</Button>
+                </Form>
+                <div className="mt-3 text-center">
+                    <Link to="/Kambaz/Account/Signup">Signin</Link>
+                </div>
+            </div>
+        </Container>
+    );
+}
