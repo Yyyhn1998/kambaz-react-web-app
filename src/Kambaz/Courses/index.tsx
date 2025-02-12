@@ -24,7 +24,7 @@ export default function Courses() {
             <hr/><hr/>
             <div className="d-flex">
                 <div className="d-none d-md-block">
-                    <CourseNavigation cid={cid} />
+                    <CourseNavigation />
                 </div>
                 <div className="flex-fill">
                     <Routes>
