@@ -1,12 +1,21 @@
+import { useParams, Link } from "react-router-dom";
+import { assignments } from "../../Database";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 
 export default function AssignmentEditor() {
+    const { cid, aid } = useParams();
+    const assignment = assignments.find(a => a._id === aid);
+
+    if (!assignment) {
+        return <h2 className="text-danger">Assignment not found</h2>;
+    }
+
     return (
         <Container className="mt-4">
             <Form>
                 <Form.Group className="mb-3">
                     <Form.Label className="d-block text-left">Assignment Name</Form.Label>
-                    <Form.Control type="text" defaultValue="A1" className="w-100" />
+                    <Form.Control type="text" defaultValue={assignment.title} className="w-100" />
                 </Form.Group>
 
                 <Form.Group className="mb-3">
@@ -14,7 +23,7 @@ export default function AssignmentEditor() {
                         <Card.Body className="p-0">
                             <Form.Control
                                 as="textarea"
-                                defaultValue={`The assignment is available online.\n\nSubmit a link to the landing page of your Web application running on Netlify.\n\nThe landing page should include the following:\n- Your full name and section\n- Links to each of the lab assignments\n- Link to the Kanbas application\n- Links to all relevant source code repositories\n\nThe Kanbas application should include a link to navigate back to the landing page.`}
+                                defaultValue={`This is the description for ${assignment.title}`}
                                 className="h-100 w-100 border-0"
                                 style={{ minHeight: "200px" }}
                             />
@@ -44,11 +53,11 @@ export default function AssignmentEditor() {
                     </Col>
                 </Row>
 
-                <Row className="mb-3 ">
+                <Row className="mb-3">
                     <Col sm={3} className="text-end">
                         <Form.Label>Display Grade as</Form.Label>
                     </Col>
-                    <Col sm={9} >
+                    <Col sm={9}>
                         <Form.Select className="w-50 ms-auto">
                             <option>Percentage</option>
                             <option>Complete/Incomplete</option>
@@ -88,13 +97,6 @@ export default function AssignmentEditor() {
                     </Card.Body>
                 </Card>
 
-                <Row className="mb-3 align-items-center">
-                    <Col sm={3} className="text-end">
-                        <Form.Label>Assign</Form.Label>
-                    </Col>
-                    <Col sm={9}></Col>
-                </Row>
-
                 <Card className="mb-3 w-50 ms-auto">
                     <Card.Body className="text-start">
                         <Form.Group className="mb-3">
@@ -119,10 +121,15 @@ export default function AssignmentEditor() {
                 </Card>
 
                 <div className="d-flex justify-content-end">
-                    <Button variant="secondary" className="me-2">Cancel</Button>
-                    <Button variant="danger">Save</Button>
+                    <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+                        <Button variant="secondary" className="me-2">Cancel</Button>
+                    </Link>
+                    <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+                        <Button variant="danger">Save</Button>
+                    </Link>
                 </div>
             </Form>
         </Container>
     );
 }
+

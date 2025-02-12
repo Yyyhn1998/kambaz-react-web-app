@@ -1,3 +1,5 @@
+import { useParams, Link } from "react-router-dom";
+import { assignments } from "../../Database";
 import { ListGroup, Button, Form, InputGroup } from "react-bootstrap";
 import { BsSearch, BsThreeDotsVertical, BsGripVertical } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa6";
@@ -5,6 +7,9 @@ import GreenCheckmark from "../Modules/GreenCheckmark";
 import AssignmentIcon from "./AssignmentIcon";
 
 export default function Assignments() {
+    const { cid } = useParams();
+    const courseAssignments = assignments.filter(a => a.course === cid);
+
     return (
         <div>
             <div className="mb-4 d-flex justify-content-between align-items-center">
@@ -44,78 +49,33 @@ export default function Assignments() {
                 </ListGroup.Item>
 
                 <ListGroup className="rounded-0">
-                    <ListGroup.Item className="wd-lesson p-3 ps-3 border-bottom">
-                        <div className="d-flex align-items-start">
-                            <BsGripVertical className="me-2 fs-3" />
-                            <AssignmentIcon className="me-3" />
-                            <div className="flex-grow-1 text-start">
-                                <a href="#/Kambaz/Courses/1234/Assignments/123"
-                                   className="fs-5 fw-bold text-decoration-none text-dark">
-                                    A1
-                                </a>
-                                <div className="text-secondary small">
-                                    <span className="text-danger fw-bold">Multiple Modules</span> |
-                                    <span className="fw-bold"> Not available until</span> May 6 at 12:00am
-                                    <br />
-                                    <span className="fw-bold">Due</span> May 13 at 11:59pm | 100 pts
+                    {courseAssignments.map((assignment) => (
+                        <ListGroup.Item key={assignment._id} className="wd-lesson p-3 ps-3 border-bottom">
+                            <div className="d-flex align-items-start">
+                                <BsGripVertical className="me-2 fs-3" />
+                                <AssignmentIcon className="me-3" />
+                                <div className="flex-grow-1 text-start">
+                                    <Link to={`/Kambaz/Courses/${cid}/Assignments/${assignment._id}`}
+                                          className="fs-5 fw-bold text-decoration-none text-dark">
+                                        {assignment.title}
+                                    </Link>
+                                    <div className="text-secondary small">
+                                        <span className="text-danger fw-bold">Multiple Modules</span> |
+                                        <span className="fw-bold"> Not available until</span> May 6 at 12:00am
+                                        <br />
+                                        <span className="fw-bold">Due</span> May 13 at 11:59pm | 100 pts
+                                    </div>
+                                </div>
+                                <div className="d-flex align-items-center">
+                                    <GreenCheckmark />
+                                    <BsThreeDotsVertical className="fs-4 ms-2" />
                                 </div>
                             </div>
-                            <div className="d-flex align-items-center">
-                                <GreenCheckmark />
-                                <BsThreeDotsVertical className="fs-4 ms-2" />
-                            </div>
-                        </div>
-                    </ListGroup.Item>
-
-                    <ListGroup.Item className="wd-lesson p-3 ps-3 border-bottom">
-                        <div className="d-flex align-items-start">
-                            <BsGripVertical className="me-2 fs-3" />
-                            <AssignmentIcon className="me-3" />
-                            <div className="flex-grow-1 text-start">
-                                <a href="#/Kambaz/Courses/1234/Assignments/124"
-                                   className="fs-5 fw-bold text-decoration-none text-dark">
-                                    A2
-                                </a>
-                                <div className="text-secondary small">
-                                    <span className="text-danger fw-bold">Multiple Modules</span> |
-                                    <span className="fw-bold"> Not available until</span> May 13 at 12:00am
-                                    <br />
-                                    <span className="fw-bold">Due</span> May 20 at 11:59pm | 100 pts
-                                </div>
-                            </div>
-                            <div className="d-flex align-items-center">
-                                <GreenCheckmark />
-                                <BsThreeDotsVertical className="fs-4 ms-2" />
-                            </div>
-                        </div>
-                    </ListGroup.Item>
-
-                    <ListGroup.Item className="wd-lesson p-3 ps-3 border-bottom">
-                        <div className="d-flex align-items-start">
-                            <BsGripVertical className="me-2 fs-3" />
-                            <AssignmentIcon className="me-3" />
-                            <div className="flex-grow-1 text-start">
-                                <a href="#/Kambaz/Courses/1234/Assignments/125"
-                                   className="fs-5 fw-bold text-decoration-none text-dark">
-                                    A3
-                                </a>
-                                <div className="text-secondary small">
-                                    <span className="text-danger fw-bold">Multiple Modules</span> |
-                                    <span className="fw-bold"> Not available until</span> May 20 at 12:00am
-                                    <br />
-                                    <span className="fw-bold">Due</span> May 27 at 11:59pm | 100 pts
-                                </div>
-                            </div>
-                            <div className="d-flex align-items-center">
-                                <GreenCheckmark />
-                                <BsThreeDotsVertical className="fs-4 ms-2" />
-                            </div>
-                        </div>
-                    </ListGroup.Item>
+                        </ListGroup.Item>
+                    ))}
                 </ListGroup>
             </ListGroup>
         </div>
     );
 }
-
 

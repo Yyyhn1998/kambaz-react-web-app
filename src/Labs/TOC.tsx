@@ -1,25 +1,41 @@
 import Nav from "react-bootstrap/Nav";
+import { useLocation } from "react-router";
+import { Link } from "react-router-dom";
+
 export default function TOC() {
+    const { pathname } = useLocation();
+
     return (
-        <Nav variant="pills">
+        <Nav variant="pills" id="wd-toc">
             <Nav.Item>
-                <Nav.Link href="#/Labs">Labs</Nav.Link>
+                <Link to="/Labs" >
+                    <Nav.Link as="span" active={pathname.includes("Labs")}> Labs </Nav.Link>
+                </Link>
             </Nav.Item>
             <Nav.Item>
-                <Nav.Link href="#/Labs/Lab1">Lab 1</Nav.Link>
+                <Link to="/Labs/Lab1" >
+                    <Nav.Link as="span" active={pathname.includes("Lab1")}> Lab 1 </Nav.Link>
+                </Link>
             </Nav.Item>
             <Nav.Item>
-                <Nav.Link href="#/Labs/Lab2">Lab 2</Nav.Link>
+                <Link to="/Labs/Lab2" >
+                    <Nav.Link as="span" active={pathname.includes("Lab2")}> Lab 2 </Nav.Link>
+                </Link>
             </Nav.Item>
             <Nav.Item>
-                <Nav.Link href="#/Labs/Lab3">Lab 3</Nav.Link>
+                <Link to="/Labs/Lab3" >
+                    <Nav.Link as="span" active={pathname.includes("Lab3")}> Lab 3 </Nav.Link>
+                </Link>
             </Nav.Item>
             <Nav.Item>
-                <Nav.Link href="#/Kambaz">Kambaz</Nav.Link>
+                <Link to="/Kambaz" >
+                    <Nav.Link as="span"> Kambaz </Nav.Link>
+                </Link>
             </Nav.Item>
             <Nav.Item>
-                <Nav.Link href="https://github.com/Yyyhn1998/kambaz-react-web-app">My GitHub</Nav.Link>
+                <Nav.Link href="https://github.com/Yyyhn1998/kambaz-react-web-app" target="_blank" > My GitHub </Nav.Link>
             </Nav.Item>
         </Nav>
-    );}
+    );
+}
 
