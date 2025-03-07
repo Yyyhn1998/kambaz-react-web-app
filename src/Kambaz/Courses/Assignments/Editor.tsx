@@ -3,17 +3,24 @@ import { useSelector, useDispatch } from "react-redux";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { addAssignment, updateAssignment } from "./reducer";
+import { AssignmentType } from "./types";
 
 export default function AssignmentEditor() {
     const { cid, aid } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const assignments = useSelector((state) => state.assignmentsReducer.assignments);
+    const assignments: AssignmentType[] = useSelector(
+        (state: { assignmentsReducer: { assignments: AssignmentType[] } }) =>
+            state.assignmentsReducer.assignments
+    );
+
     const existingAssignment = assignments.find(a => a._id === aid);
 
     // eslint-disable-next-line
     const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+
 
     const [formData, setFormData] = useState({
         title: "",
@@ -45,12 +52,9 @@ export default function AssignmentEditor() {
         }
     }, [existingAssignment]);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSave = () => {

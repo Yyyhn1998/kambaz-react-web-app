@@ -3,16 +3,20 @@ import { FormControl } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { enrollCourse, unenrollCourse } from "./Account/Enrollments/enrollmentsReducer";
+import { EnrollmentType } from "./Account/Enrollments/types"
+
+interface CourseType {
+    _id: string;
+    name: string;
+    description: string;
+}
 
 export default function Dashboard({
                                       courses, course, setCourse, addNewCourse, deleteCourse, updateCourse
                                   }: {
-    // eslint-disable-next-line
-    courses: any[];
-    // eslint-disable-next-line
-    course: any;
-    // eslint-disable-next-line
-    setCourse: (course: any) => void;
+    courses: CourseType[];
+    course: CourseType;
+    setCourse: (course: CourseType) => void;
     addNewCourse: () => void;
     deleteCourse: (courseId: string) => void;
     updateCourse: () => void;
@@ -28,14 +32,14 @@ export default function Dashboard({
     const isStudent = currentUser?.role === "STUDENT";
 
     const filteredCourses = courses.filter((course) =>
-        enrollments.some((enrollment) =>
+        enrollments.some((enrollment: EnrollmentType) =>
             enrollment.user === currentUser?._id && enrollment.course === course._id
         )
     );
 
     const displayedCourses = showAllCourses ? courses : filteredCourses;
 
-    const handleEnrollCourse = (courseId) => {
+    const handleEnrollCourse = (courseId: string) => {
         if (!currentUser) return;
 
         dispatch(enrollCourse({
@@ -44,7 +48,7 @@ export default function Dashboard({
         }));
     };
 
-    const handleUnenrollCourse = (courseId) => {
+    const handleUnenrollCourse = (courseId: string) => {
         if (!currentUser) return;
 
         dispatch(unenrollCourse({
@@ -80,6 +84,7 @@ export default function Dashboard({
                         onChange={(e) => setCourse({ ...course, name: e.target.value })}
                     />
                     <FormControl
+                        as="textarea"
                         value={course.description}
                         rows={3}
                         onChange={(e) => setCourse({ ...course, description: e.target.value })}
@@ -97,7 +102,7 @@ export default function Dashboard({
                 <div className="row row-cols-1 row-cols-md-5 g-4">
                     {displayedCourses.map((course) => {
                         const isEnrolled = enrollments.some(
-                            (enrollment) => enrollment.course === course._id && enrollment.user === currentUser?._id
+                            (enrollment: EnrollmentType) => enrollment.course === course._id && enrollment.user === currentUser?._id
                         );
 
                         return (

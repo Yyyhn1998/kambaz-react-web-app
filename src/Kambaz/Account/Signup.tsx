@@ -4,16 +4,10 @@ import { useDispatch } from "react-redux";
 import { setCurrentUser } from "./reducer";
 import * as db from "../Database";
 import { Form, Button, Container } from "react-bootstrap";
-
-type UserType = {
-    _id: string;
-    username: string;
-    password: string;
-    role: string;
-};
+import { UserType } from "./types"
 
 export default function Signup() {
-    const [newUser, setNewUser] = useState<Omit<UserType, "_id" | "role">>({
+    const [newUser, setNewUser] = useState({
         username: "",
         password: "",
     });
@@ -27,19 +21,25 @@ export default function Signup() {
             return;
         }
 
-        // 查找是否已存在相同用户名
         const existingUser = db.users.find((u: UserType) => u.username === newUser.username);
         if (existingUser) {
             alert("Username already exists. Please choose another one.");
             return;
         }
 
-        // 创建新用户
         const user: UserType = {
             _id: Date.now().toString(),
             username: newUser.username,
             password: newUser.password,
+            firstName: "",
+            lastName: "",
+            email: "",
+            dob: "",
             role: "STUDENT",
+            loginId: Date.now().toString(), // Or any default value
+            section: "",
+            lastActivity: new Date().toISOString(),
+            totalActivity: "0"
         };
 
         db.users.push(user);
