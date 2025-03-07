@@ -5,8 +5,19 @@ import { setCurrentUser } from "./reducer";
 import * as db from "../Database";
 import { Form, Button, Container } from "react-bootstrap";
 
+type UserType = {
+    _id: string;
+    username: string;
+    password: string;
+    role: string;
+};
+
 export default function Signup() {
-    const [newUser, setNewUser] = useState<{ username?: string; password?: string }>({});
+    const [newUser, setNewUser] = useState<Omit<UserType, "_id" | "role">>({
+        username: "",
+        password: "",
+    });
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -16,14 +27,21 @@ export default function Signup() {
             return;
         }
 
-        // eslint-disable-next-line
-        const existingUser = db.users.find((u: any) => u.username === newUser.username);
+        // 查找是否已存在相同用户名
+        const existingUser = db.users.find((u: UserType) => u.username === newUser.username);
         if (existingUser) {
             alert("Username already exists. Please choose another one.");
             return;
         }
 
-        const user = { ...newUser, _id: Date.now().toString(), role: "STUDENT" }; // 默认角色: STUDENT
+        // 创建新用户
+        const user: UserType = {
+            _id: Date.now().toString(),
+            username: newUser.username,
+            password: newUser.password,
+            role: "STUDENT",
+        };
+
         db.users.push(user);
         dispatch(setCurrentUser(user));
         navigate("/Kambaz/Dashboard");
@@ -38,14 +56,20 @@ export default function Signup() {
                         <Form.Control
                             type="text"
                             placeholder="Username"
-                            onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                            value={newUser.username}
+                            onChange={(e) =>
+                                setNewUser((prev) => ({ ...prev, username: e.target.value }))
+                            }
                         />
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Control
                             type="password"
                             placeholder="Password"
-                            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                            value={newUser.password}
+                            onChange={(e) =>
+                                setNewUser((prev) => ({ ...prev, password: e.target.value }))
+                            }
                         />
                     </Form.Group>
                     <Button variant="primary" className="w-100" onClick={signup}>

@@ -1,11 +1,21 @@
 import { useSelector } from "react-redux";
 import { Navigate, Outlet, useParams } from "react-router-dom";
 
+type EnrollmentType = {
+    course: string;
+    user: string;
+};
+
 export default function ProtectedCourseRoute() {
-    // eslint-disable-next-line
+        // eslint-disable-next-line
     const { currentUser } = useSelector((state: any) => state.accountReducer);
-    // eslint-disable-next-line
-    const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
+
+
+    const enrollments: EnrollmentType[] = useSelector(
+        // eslint-disable-next-line
+        (state: any) => state.enrollmentsReducer.enrollments
+    );
+
     const { cid } = useParams();
 
     if (!currentUser) {
@@ -14,7 +24,8 @@ export default function ProtectedCourseRoute() {
 
     if (currentUser.role === "STUDENT") {
         const isEnrolled = enrollments.some(
-            (enrollment) => enrollment.course === cid && enrollment.user === currentUser._id
+            (enrollment: EnrollmentType) =>
+                enrollment.course === cid && enrollment.user === currentUser._id
         );
 
         if (!isEnrolled) {
