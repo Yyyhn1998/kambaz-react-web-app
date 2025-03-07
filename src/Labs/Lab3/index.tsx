@@ -30,11 +30,25 @@ import Add from "./Add";
 import Square from "./Square";
 import Highlight from "./Highlight";
 import PathParameters from "./PathParameters.tsx";
+import { useSelector } from "react-redux";
+import ListGroup from "react-bootstrap/ListGroup";
 export default function Lab3() {
-        console.log('Hello World!');
+    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+    const { todos } = useSelector((state: any) => state.todosReducer);
+    console.log('Hello World!');
         return (
         <div id="wd-lab3">
             <h3>Lab 3</h3>
+            <ListGroup>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {todos.map((todo: any) => (
+                    <ListGroup.Item key={todo.id}>
+                        {todo.title}
+                    </ListGroup.Item>
+                ))}
+            </ListGroup>
+            <hr />
+
             <VariablesAndConstants/>
             <VariableTypes/>
             <BooleanVariables/>

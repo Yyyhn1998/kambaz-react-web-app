@@ -1,13 +1,84 @@
-import { useParams, Link } from "react-router-dom";
-import { assignments } from "../../Database";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { addAssignment, updateAssignment } from "./reducer";
 
 export default function AssignmentEditor() {
     const { cid, aid } = useParams();
-    const assignment = assignments.find(a => a._id === aid);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    if (!assignment) {
-        return <h2 className="text-danger">Assignment not found</h2>;
+    const assignments = useSelector((state) => state.assignmentsReducer.assignments);
+    const existingAssignment = assignments.find(a => a._id === aid);
+
+    // eslint-disable-next-line
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+        points: 100,
+        assignmentGroup: "ASSIGNMENTS",
+        displayGrade: "Percentage",
+        submissionType: "Online",
+        assignTo: "Everyone",
+        dueDate: "",
+        availableFromDate: "",
+        availableUntilDate: "",
+    });
+
+    useEffect(() => {
+        if (existingAssignment) {
+            setFormData({
+                title: existingAssignment.title || "",
+                description: existingAssignment.description ?? `This is the description for ${existingAssignment.title}`,
+                points: existingAssignment.points || 100,
+                assignmentGroup: existingAssignment.assignmentGroup || "ASSIGNMENTS",
+                displayGrade: existingAssignment.displayGrade || "Percentage",
+                submissionType: existingAssignment.submissionType || "Online",
+                assignTo: existingAssignment.assignTo || "Everyone",
+                dueDate: existingAssignment.dueDate || "",
+                availableFromDate: existingAssignment.availableFromDate || "",
+                availableUntilDate: existingAssignment.availableUntilDate || "",
+            });
+        }
+    }, [existingAssignment]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
+    const handleSave = () => {
+        const updatedAssignment = {
+            _id: existingAssignment ? existingAssignment._id : Math.random().toString(36).substr(2, 9),
+            title: formData.title,
+            course: cid,
+            description: formData.description,
+            points: formData.points,
+            dueDate: formData.dueDate,
+            availableFromDate: formData.availableFromDate,
+            availableUntilDate: formData.availableUntilDate,
+            assignmentGroup: formData.assignmentGroup,
+            displayGrade: formData.displayGrade,
+            submissionType: formData.submissionType,
+            assignTo: formData.assignTo,
+        };
+
+        if (existingAssignment) {
+            dispatch(updateAssignment(updatedAssignment));
+        } else {
+            dispatch(addAssignment(updatedAssignment));
+        }
+        navigate(`/Kambaz/Courses/${cid}/Assignments`);
+    };
+
+    if (!currentUser || currentUser.role !== "FACULTY") {
+        return <Navigate to={`/Kambaz/Courses/${cid}/Assignments`} />;
     }
 
     return (
@@ -15,7 +86,13 @@ export default function AssignmentEditor() {
             <Form>
                 <Form.Group className="mb-3">
                     <Form.Label className="d-block text-left">Assignment Name</Form.Label>
-                    <Form.Control type="text" defaultValue={assignment.title} className="w-100" />
+                    <Form.Control
+                        type="text"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        className="w-100"
+                    />
                 </Form.Group>
 
                 <Form.Group className="mb-3">
@@ -23,7 +100,9 @@ export default function AssignmentEditor() {
                         <Card.Body className="p-0">
                             <Form.Control
                                 as="textarea"
-                                defaultValue={`This is the description for ${assignment.title}`}
+                                name="description"
+                                value={formData.description}
+                                onChange={handleChange}
                                 className="h-100 w-100 border-0"
                                 style={{ minHeight: "200px" }}
                             />
@@ -36,7 +115,13 @@ export default function AssignmentEditor() {
                         <Form.Label>Points</Form.Label>
                     </Col>
                     <Col sm={9}>
-                        <Form.Control type="number" defaultValue="100" className="w-50 ms-auto" />
+                        <Form.Control
+                            type="number"
+                            name="points"
+                            value={formData.points}
+                            onChange={handleChange}
+                            className="w-50 ms-auto"
+                        />
                     </Col>
                 </Row>
 
@@ -45,7 +130,12 @@ export default function AssignmentEditor() {
                         <Form.Label>Assignment Group</Form.Label>
                     </Col>
                     <Col sm={9}>
-                        <Form.Select className="w-50 ms-auto">
+                        <Form.Select
+                            className="w-50 ms-auto"
+                            name="assignmentGroup"
+                            value={formData.assignmentGroup}
+                            onChange={handleChange}
+                        >
                             <option>ASSIGNMENTS</option>
                             <option>QUIZZES</option>
                             <option>PROJECTS</option>
@@ -58,7 +148,12 @@ export default function AssignmentEditor() {
                         <Form.Label>Display Grade as</Form.Label>
                     </Col>
                     <Col sm={9}>
-                        <Form.Select className="w-50 ms-auto">
+                        <Form.Select
+                            className="w-50 ms-auto"
+                            name="displayGrade"
+                            value={formData.displayGrade}
+                            onChange={handleChange}
+                        >
                             <option>Percentage</option>
                             <option>Complete/Incomplete</option>
                             <option>Points</option>
@@ -66,70 +161,34 @@ export default function AssignmentEditor() {
                     </Col>
                 </Row>
 
-                <Row className="mb-3 align-items-center">
+                <Row className="mb-3">
                     <Col sm={3} className="text-end">
-                        <Form.Label>Submission Type</Form.Label>
+                        <Form.Label>Due Date</Form.Label>
                     </Col>
-                    <Col sm={9}></Col>
+                    <Col sm={9}>
+                        <Form.Control
+                            type="date"
+                            name="dueDate"
+                            value={formData.dueDate}
+                            onChange={handleChange}
+                            className="w-50 ms-auto"
+                        />
+                    </Col>
                 </Row>
 
-                <Card className="mb-3 w-50 ms-auto">
-                    <Card.Body>
-                        <Row className="mb-3 ms-auto">
-                            <Col sm={12} className="d-flex justify-content-center">
-                                <Form.Select style={{ width: "100%" }}>
-                                    <option>Online</option>
-                                    <option>On Paper</option>
-                                    <option>External Tool</option>
-                                    <option>No Submission</option>
-                                </Form.Select>
-                            </Col>
-                        </Row>
-
-                        <div className="d-flex flex-column align-items-start">
-                            <h6 className="fw-bold">Online Entry Options</h6>
-                            <Form.Check type="checkbox" label="Text Entry" />
-                            <Form.Check type="checkbox" label="Website URL" defaultChecked />
-                            <Form.Check type="checkbox" label="Media Recordings" />
-                            <Form.Check type="checkbox" label="Student Annotation" />
-                            <Form.Check type="checkbox" label="File Uploads" />
-                        </div>
-                    </Card.Body>
-                </Card>
-
-                <Card className="mb-3 w-50 ms-auto">
-                    <Card.Body className="text-start">
-                        <Form.Group className="mb-3">
-                            <Form.Label className="fw-bold">Assign to</Form.Label>
-                            <Form.Control type="text" defaultValue="Everyone" className="w-100" />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label className="fw-bold">Due</Form.Label>
-                            <Form.Control type="date" className="w-100" />
-                        </Form.Group>
-                        <Row className="mb-3">
-                            <Col sm={6}>
-                                <Form.Label className="fw-bold">Available from</Form.Label>
-                                <Form.Control type="date" className="w-100" />
-                            </Col>
-                            <Col sm={6}>
-                                <Form.Label className="fw-bold">Until</Form.Label>
-                                <Form.Control type="date" className="w-100" />
-                            </Col>
-                        </Row>
-                    </Card.Body>
-                </Card>
-
                 <div className="d-flex justify-content-end">
-                    <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
-                        <Button variant="secondary" className="me-2">Cancel</Button>
-                    </Link>
-                    <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
-                        <Button variant="danger">Save</Button>
-                    </Link>
+                    <Button
+                        variant="secondary"
+                        className="me-2"
+                        onClick={() => navigate(`/Kambaz/Courses/${cid}/Assignments`)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={handleSave}>
+                        Save
+                    </Button>
                 </div>
             </Form>
         </Container>
     );
 }
-

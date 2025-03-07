@@ -28,6 +28,11 @@ export default function TOC() {
                 </Link>
             </Nav.Item>
             <Nav.Item>
+                <Link to="/Labs/Lab4" >
+                    <Nav.Link as="span" active={pathname.includes("Lab4")}> Lab 4 </Nav.Link>
+                </Link>
+            </Nav.Item>
+            <Nav.Item>
                 <Link to="/Kambaz" >
                     <Nav.Link as="span"> Kambaz </Nav.Link>
                 </Link>

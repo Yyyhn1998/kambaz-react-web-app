@@ -1,14 +1,52 @@
-import { useParams, Link } from "react-router-dom";
-import { assignments } from "../../Database";
-import { ListGroup, Button, Form, InputGroup } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import { ListGroup, Button, Form, InputGroup, Modal } from "react-bootstrap";
 import { BsSearch, BsThreeDotsVertical, BsGripVertical } from "react-icons/bs";
-import { FaPlus } from "react-icons/fa6";
+import { FaPlus, FaTrash } from "react-icons/fa6";
 import GreenCheckmark from "../Modules/GreenCheckmark";
 import AssignmentIcon from "./AssignmentIcon";
+import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { deleteAssignment } from "./reducer";
+import { useState } from "react";
 
 export default function Assignments() {
     const { cid } = useParams();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { assignments } = useSelector((state) => state.assignmentsReducer);
     const courseAssignments = assignments.filter(a => a.course === cid);
+    // eslint-disable-next-line
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedAssignment, setSelectedAssignment] = useState(null);
+
+    const handleDeleteClick = (assignment) => {
+        setSelectedAssignment(assignment);
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (selectedAssignment) {
+            dispatch(deleteAssignment(selectedAssignment._id));
+        }
+        setShowDeleteModal(false);
+        setSelectedAssignment(null);
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteModal(false);
+        setSelectedAssignment(null);
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "Not set";
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric"
+        });
+    };
 
     return (
         <div>
@@ -17,22 +55,24 @@ export default function Assignments() {
                     <InputGroup.Text className="bg-white border-end-0">
                         <BsSearch className="text-secondary" />
                     </InputGroup.Text>
-                    <Form.Control
-                        placeholder="Search for Assignments"
-                        className="border-start-0"
-                    />
+                    <Form.Control placeholder="Search for Assignments" className="border-start-0" />
                 </InputGroup>
 
-                <div>
-                    <Button variant="secondary" className="me-2">
-                        <FaPlus className="me-2 mb-1" />
-                        Group
-                    </Button>
-                    <Button variant="danger">
-                        <FaPlus className="me-2 mb-1" />
-                        Assignment
-                    </Button>
-                </div>
+                {currentUser?.role === "FACULTY" && (
+                    <div>
+                        <Button variant="secondary" className="me-2">
+                            <FaPlus className="me-2 mb-1" />
+                            Group
+                        </Button>
+                        <Button
+                            variant="danger"
+                            onClick={() => navigate(`/Kambaz/Courses/${cid}/Assignments/editor`)}
+                        >
+                            <FaPlus className="me-2 mb-1" />
+                            Assignment
+                        </Button>
+                    </div>
+                )}
             </div>
 
             <ListGroup className="rounded-0 border">
@@ -43,7 +83,7 @@ export default function Assignments() {
                     </div>
                     <div className="d-flex align-items-center">
                         <span className="text-secondary me-3">40% of Total</span>
-                        <FaPlus className="me-3" />
+                        {currentUser?.role === "FACULTY" && <FaPlus className="me-3" />}
                         <BsThreeDotsVertical />
                     </div>
                 </ListGroup.Item>
@@ -51,7 +91,7 @@ export default function Assignments() {
                 <ListGroup className="rounded-0">
                     {courseAssignments.map((assignment) => (
                         <ListGroup.Item key={assignment._id} className="wd-lesson p-3 ps-3 border-bottom">
-                            <div className="d-flex align-items-start">
+                            <div className="d-flex align-items-start w-100">
                                 <BsGripVertical className="me-2 fs-3" />
                                 <AssignmentIcon className="me-3" />
                                 <div className="flex-grow-1 text-start">
@@ -61,21 +101,48 @@ export default function Assignments() {
                                     </Link>
                                     <div className="text-secondary small">
                                         <span className="text-danger fw-bold">Multiple Modules</span> |
-                                        <span className="fw-bold"> Not available until</span> May 6 at 12:00am
+                                        <span className="fw-bold"> Not available until</span> {formatDate(assignment.availableFromDate)} at 12:00am
                                         <br />
-                                        <span className="fw-bold">Due</span> May 13 at 11:59pm | 100 pts
+                                        <span className="fw-bold">Due</span> {formatDate(assignment.dueDate)} at 11:59pm | {assignment.points || 100} pts
                                     </div>
                                 </div>
                                 <div className="d-flex align-items-center">
                                     <GreenCheckmark />
-                                    <BsThreeDotsVertical className="fs-4 ms-2" />
+                                    {currentUser?.role === "FACULTY" && (
+                                        <>
+                                            <Button
+                                                variant="link"
+                                                className="text-danger"
+                                                onClick={() => handleDeleteClick(assignment)}
+                                            >
+                                                <FaTrash />
+                                            </Button>
+                                            <BsThreeDotsVertical className="fs-4 ms-2" />
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </ListGroup.Item>
                     ))}
                 </ListGroup>
             </ListGroup>
+
+            <Modal show={showDeleteModal} onHide={handleCancelDelete} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Delete</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete this assignment?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCancelDelete}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={handleConfirmDelete}>
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 }
-

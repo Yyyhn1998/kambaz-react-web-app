@@ -6,12 +6,18 @@ import AssignmentEditor from "./Assignments/Editor";
 import { Route, Routes, useParams, useLocation } from "react-router";
 import { FaAlignJustify } from "react-icons/fa";
 import PeopleTable from "./People/Table.tsx";
-import { courses } from "../Database";
+import {useState} from "react";
+import * as db from "../Database";
 
-export default function Courses() {
+
+// eslint-disable-next-line
+export default function Courses({ courses }: { courses: any[]; }) {
+
     const { cid } = useParams();
     const course = courses.find((course) => course._id === cid);
     const { pathname } = useLocation();
+    // eslint-disable-next-line
+    const [modules, setModules] = useState<any[]>(db.modules);
 
     return (
         <div id="wd-courses">
@@ -28,8 +34,18 @@ export default function Courses() {
                 </div>
                 <div className="flex-fill">
                     <Routes>
-                        <Route path="Home" element={<Home />} />
-                        <Route path="Modules" element={<Modules />} />
+                        <Route path="Home" element={
+                            <Home
+                                modules={modules}
+                                setModules={setModules}
+                            />
+                        } />
+                        <Route path="Modules" element={
+                            <Modules
+                                modules={modules}
+                                setModules={setModules}
+                            />
+                        } />
                         <Route path="Assignments" element={<Assignments />} />
                         <Route path="Assignments/:aid" element={<AssignmentEditor />} />
                         <Route path="People" element={<PeopleTable />} />
