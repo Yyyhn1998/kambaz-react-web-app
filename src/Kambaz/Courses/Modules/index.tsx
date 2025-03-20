@@ -10,20 +10,22 @@ import { setModule, addModule, editModule, updateModule, deleteModule } from "./
 import * as coursesClient from "../client";
 import * as modulesClient from "./client";
 
-export default function Modules() {
+// eslint-disable-next-line
+export default function Modules(props: any) {
+    void props;
     const { cid } = useParams();
     const [moduleName, setModuleName] = useState("");
 
     // eslint-disable-next-line
     const { modules } = useSelector((state: any) => state.modulesReducer);
-    // const { modules: reduxModules } = useSelector((state: any) => state.modulesReducer);
 
-
-    const modulesToUse = modules.filter(module => module.course === cid)
+    // eslint-disable-next-line
+    const modulesToUse = modules.filter((module: any) => module.course === cid);
 
     // eslint-disable-next-line
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const dispatch = useDispatch();
+
     const removeModule = async (moduleId: string) => {
         await modulesClient.deleteModule(moduleId);
         dispatch(deleteModule(moduleId));
@@ -46,10 +48,10 @@ export default function Modules() {
         const modules = await coursesClient.findModulesForCourse(cid as string);
         dispatch(setModule(modules));
     };
+
     useEffect(() => {
         fetchModules();
     }, []);
-
 
     return (
         <div>
@@ -81,7 +83,6 @@ export default function Modules() {
                                             onKeyDown={(e) => {
                                                 if (e.key === "Enter") {
                                                     saveModule({ ...module, editing: false });
-
                                                 }
                                             }}
                                             defaultValue={module.name}

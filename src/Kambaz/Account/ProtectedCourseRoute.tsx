@@ -3,20 +3,23 @@ import { Navigate, Outlet, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { setEnrollments } from "./Enrollments/enrollmentsReducer";
 import * as enrollmentsClient from "./Enrollments/client";
+import {EnrollmentType} from "./Enrollments/types.ts";
 
 export default function ProtectedCourseRoute() {
     const dispatch = useDispatch();
+    // eslint-disable-next-line
     const { currentUser } = useSelector((state: any) => state.accountReducer);
+    // eslint-disable-next-line
     const enrollments = useSelector((state: any) => state.enrollmentsReducer.enrollments);
     const { cid } = useParams();
 
     useEffect(() => {
         if (currentUser && currentUser.role === "STUDENT") {
             enrollmentsClient.fetchUserEnrollments(currentUser._id)
-                .then((data) => dispatch(setEnrollments(data))) // ✅ Redux 状态更新
-                .catch((error) => console.error("Failed to fetch enrollments:", error)); // ❌ 防止 API 出错无反馈
+                .then((data) => dispatch(setEnrollments(data)))
+                .catch((error) => console.error("Failed to fetch enrollments:", error));
         }
-    }, [currentUser, dispatch]); // ✅ 这样 useEffect 只有在 `currentUser` 变化时才会运行
+    }, [currentUser, dispatch]);
 
     if (!currentUser) {
         return <Navigate to="/login" />;
@@ -24,7 +27,7 @@ export default function ProtectedCourseRoute() {
 
     if (currentUser.role === "STUDENT") {
         const isEnrolled = enrollments.some(
-            (e) => e.course === cid && e.user === currentUser._id
+            (e: EnrollmentType) => e.course === cid && e.user === currentUser?._id
         );
 
         if (!isEnrolled) {

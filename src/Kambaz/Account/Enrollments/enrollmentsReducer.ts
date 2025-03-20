@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { EnrollmentType } from "./types";
 
-const initialState = {
-    enrollments: [],
+const initialState: { enrollments: EnrollmentType[] } = {
+    enrollments: []
 };
 
 const enrollmentsSlice = createSlice({
