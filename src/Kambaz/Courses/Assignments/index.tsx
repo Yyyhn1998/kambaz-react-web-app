@@ -6,9 +6,10 @@ import GreenCheckmark from "../Modules/GreenCheckmark";
 import AssignmentIcon from "./AssignmentIcon";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { deleteAssignment } from "./reducer";
-import { useState } from "react";
+import { setAssignments } from "./reducer";
+import { useState, useEffect } from "react";
 import { AssignmentType } from "./types";
+import * as assignmentsClient from "./client";
 
 export default function Assignments() {
     const { cid } = useParams();
@@ -17,10 +18,8 @@ export default function Assignments() {
 
     const assignments: AssignmentType[] = useSelector(
         (state: { assignmentsReducer: { assignments: AssignmentType[] } }) =>
-            state.assignmentsReducer.assignments
+            state.assignmentsReducer.assignments.filter(a => a.course === cid)
     );
-
-    const courseAssignments = assignments.filter((a: AssignmentType) => a.course === cid);
 
     const { currentUser } = useSelector(
         (state: { accountReducer: { currentUser: { role: string } | null } }) =>
@@ -30,14 +29,31 @@ export default function Assignments() {
     const [selectedAssignment, setSelectedAssignment] = useState<AssignmentType | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+
+    useEffect(() => {
+        const fetchAssignments = async () => {
+            try {
+                const assignments = await assignmentsClient.fetchAllAssignments();
+                dispatch(setAssignments(assignments));
+            } catch (error) {
+                console.error("Failed to fetch assignments", error);
+            }
+        };
+
+        fetchAssignments();
+    }, []);
+
+
     const handleDeleteClick = (assignment: AssignmentType) => {
         setSelectedAssignment(assignment);
         setShowDeleteModal(true);
     };
 
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (selectedAssignment) {
-            dispatch(deleteAssignment(selectedAssignment._id));
+            await assignmentsClient.deleteAssignment(selectedAssignment._id);
+            const updatedAssignments = await assignmentsClient.fetchAllAssignments();
+            dispatch(setAssignments(updatedAssignments));
         }
         setShowDeleteModal(false);
         setSelectedAssignment(null);
@@ -98,7 +114,7 @@ export default function Assignments() {
                 </ListGroup.Item>
 
                 <ListGroup className="rounded-0">
-                    {courseAssignments.map((assignment) => (
+                    {assignments.map((assignment) => (
                         <ListGroup.Item key={assignment._id} className="wd-lesson p-3 ps-3 border-bottom">
                             <div className="d-flex align-items-start w-100">
                                 <BsGripVertical className="me-2 fs-3" />

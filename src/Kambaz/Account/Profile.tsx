@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setCurrentUser } from "./reducer";
 import { Form, Button, Container } from "react-bootstrap";
+import * as client from "./client";
 
 export default function Profile() {
     // eslint-disable-next-line
@@ -20,10 +21,16 @@ export default function Profile() {
         }
     }, [currentUser, navigate]);
 
-    const signout = () => {
+    const signout = async() => {
+        await client.signout();
         dispatch(setCurrentUser(null));
         navigate("/Kambaz/Account/Signin");
     };
+    const updateProfile = async () => {
+        const updatedProfile = await client.updateUser(profile);
+        dispatch(setCurrentUser(updatedProfile));
+    };
+
 
     return (
         <Container className="d-flex justify-content-center mt-5">
@@ -36,7 +43,7 @@ export default function Profile() {
                                 type="text"
                                 value={profile.username || ""}
                                 placeholder="Username"
-                                onChange={(e) => setProfile({ ...profile, username: e.target.value })}
+                                onChange={(e) => setProfile({...profile, username: e.target.value})}
                             />
                         </Form.Group>
 
@@ -45,7 +52,7 @@ export default function Profile() {
                                 type="password"
                                 value={profile.password || ""}
                                 placeholder="Password"
-                                onChange={(e) => setProfile({ ...profile, password: e.target.value })}
+                                onChange={(e) => setProfile({...profile, password: e.target.value})}
                             />
                         </Form.Group>
 
@@ -54,7 +61,10 @@ export default function Profile() {
                                 type="text"
                                 value={profile.firstName || ""}
                                 placeholder="First Name"
-                                onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                                onChange={(e) => setProfile({
+                                    ...profile,
+                                    firstName: e.target.value
+                                })}
                             />
                         </Form.Group>
 
@@ -63,7 +73,7 @@ export default function Profile() {
                                 type="text"
                                 value={profile.lastName || ""}
                                 placeholder="Last Name"
-                                onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                                onChange={(e) => setProfile({...profile, lastName: e.target.value})}
                             />
                         </Form.Group>
 
@@ -71,7 +81,7 @@ export default function Profile() {
                             <Form.Control
                                 type="date"
                                 value={profile.dob || ""}
-                                onChange={(e) => setProfile({ ...profile, dob: e.target.value })}
+                                onChange={(e) => setProfile({...profile, dob: e.target.value})}
                             />
                         </Form.Group>
 
@@ -80,14 +90,14 @@ export default function Profile() {
                                 type="email"
                                 value={profile.email || ""}
                                 placeholder="Email"
-                                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                                onChange={(e) => setProfile({...profile, email: e.target.value})}
                             />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
                             <Form.Select
                                 value={profile.role || "USER"}
-                                onChange={(e) => setProfile({ ...profile, role: e.target.value })}
+                                onChange={(e) => setProfile({...profile, role: e.target.value})}
                             >
                                 <option value="USER">User</option>
                                 <option value="ADMIN">Admin</option>
@@ -96,11 +106,16 @@ export default function Profile() {
                             </Form.Select>
                         </Form.Group>
 
-                        <Button variant="danger" className="w-100" onClick={signout}>
+                        <button onClick={updateProfile}
+                                className="btn btn-primary w-100 mb-2"> Update
+                        </button>
+
+                        <Button variant="danger" className="w-100 mt-2" onClick={signout}>
                             Sign out
                         </Button>
                     </Form>
                 )}
+
             </div>
         </Container>
     );

@@ -1,9 +1,10 @@
 import { useSelector, useDispatch } from "react-redux";
 import { FormControl } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { enrollCourse, unenrollCourse } from "./Account/Enrollments/enrollmentsReducer";
-import { EnrollmentType } from "./Account/Enrollments/types"
+import { useEffect, useState } from "react";
+import { enrollCourse, unenrollCourse, setEnrollments } from "./Account/Enrollments/enrollmentsReducer";
+import * as enrollmentsClient from "./Account/Enrollments/client";
+import { EnrollmentType } from "./Account/Enrollments/types";
 
 interface CourseType {
     _id: string;
@@ -21,41 +22,86 @@ export default function Dashboard({
     deleteCourse: (courseId: string) => void;
     updateCourse: () => void;
 }) {
+    const dispatch = useDispatch();
     // eslint-disable-next-line
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     // eslint-disable-next-line
     const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
-    const dispatch = useDispatch();
 
     const [showAllCourses, setShowAllCourses] = useState(false);
+    const [allCourses, setAllCourses] = useState<CourseType[]>([]);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     const isStudent = currentUser?.role === "STUDENT";
 
-    const filteredCourses = courses.filter((course) =>
-        enrollments.some((enrollment: EnrollmentType) =>
-            enrollment.user === currentUser?._id && enrollment.course === course._id
-        )
-    );
+    useEffect(() => {
+        if (currentUser) {
+            console.log("Fetching enrollments for user:", currentUser._id);
+            enrollmentsClient.fetchUserEnrollments(currentUser._id).then((data) => {
+                console.log("Fetched user enrollments:", data);
+                dispatch(setEnrollments(data));
+            }).catch(error => {
+                console.error("Error fetching enrollments:", error);
+            });
+        }
+    }, [currentUser, dispatch, refreshTrigger]);
 
-    const displayedCourses = showAllCourses ? courses : filteredCourses;
+    useEffect(() => {
+        if (showAllCourses && isStudent) {
+            console.log("Fetching all courses");
+            enrollmentsClient.fetchAllCourses().then(data => {
+                console.log("Fetched all courses:", data);
+                setAllCourses(data);
+            }).catch(error => {
+                console.error("Error fetching all courses:", error);
+            });
+        }
+    }, [showAllCourses, isStudent]);
 
-    const handleEnrollCourse = (courseId: string) => {
+    const handleEnrollCourse = async (courseId: string) => {
         if (!currentUser) return;
 
-        dispatch(enrollCourse({
-            courseId: courseId,
-            userId: currentUser._id
-        }));
+        console.log("Trying to enroll in course:", courseId);
+
+        try {
+            await enrollmentsClient.enrollUser(currentUser._id, courseId);
+            console.log("Successfully enrolled in course:", courseId);
+            dispatch(enrollCourse({ courseId, userId: currentUser._id }));
+
+            setRefreshTrigger(prev => prev + 1);
+        } catch (error) {
+            console.error("Failed to enroll", error);
+        }
     };
 
-    const handleUnenrollCourse = (courseId: string) => {
+    const handleUnenrollCourse = async (courseId: string) => {
         if (!currentUser) return;
 
-        dispatch(unenrollCourse({
-            courseId: courseId,
-            userId: currentUser._id
-        }));
+        try {
+            await enrollmentsClient.unenrollUser(currentUser._id, courseId);
+            dispatch(unenrollCourse({ courseId, userId: currentUser._id }));
+
+            setRefreshTrigger(prev => prev + 1);
+        } catch (error) {
+            console.error("Failed to unenroll", error);
+        }
     };
+
+    const filteredCourses = isStudent
+        ? showAllCourses
+            ? allCourses.length > 0 ? allCourses : courses
+            : courses.filter(course => enrollments.some(
+                (enrollment: EnrollmentType) => enrollment.course === course._id && enrollment.user === currentUser?._id
+            ))
+        : courses;
+
+    console.log("Rendering courses:", {
+        showAllCourses,
+        enrollmentsCount: enrollments.length,
+        allCoursesCount: allCourses.length,
+        coursesCount: courses.length,
+        filteredCoursesCount: filteredCourses.length
+    });
 
     return (
         <div className="p-4" id="wd-dashboard">
@@ -67,7 +113,7 @@ export default function Dashboard({
                     className="btn btn-primary float-end"
                     onClick={() => setShowAllCourses(!showAllCourses)}
                 >
-                    {showAllCourses ? "Show My Courses" : "Enrollments"}
+                    {showAllCourses ? "Show My Courses" : "Show All Courses"}
                 </button>
             )}
 
@@ -93,14 +139,14 @@ export default function Dashboard({
             )}
 
             <hr />
-            <h2 id="wd-dashboard-published">Published Courses ({displayedCourses.length})</h2>
+            <h2 id="wd-dashboard-published">Published Courses ({filteredCourses.length})</h2>
             <hr />
 
-            {displayedCourses.length === 0 ? (
+            {filteredCourses.length === 0 ? (
                 <h3 className="text-danger">No Courses Available</h3>
             ) : (
                 <div className="row row-cols-1 row-cols-md-5 g-4">
-                    {displayedCourses.map((course) => {
+                    {filteredCourses.map((course) => {
                         const isEnrolled = enrollments.some(
                             (enrollment: EnrollmentType) => enrollment.course === course._id && enrollment.user === currentUser?._id
                         );
@@ -109,7 +155,7 @@ export default function Dashboard({
                             <div key={course._id} className="col" style={{ width: "350px" }}>
                                 <div className="card">
                                     <Link to={`/Kambaz/Courses/${course._id}/Home`} className="text-decoration-none text-dark">
-                                        <img src="/images/reactjs.jpg" className="card-img-top" width="100%" height={160} />
+                                        <img src="/images/reactjs.jpg" className="card-img-top" width="100%" height={160} alt="Course thumbnail" />
                                         <div className="card-body">
                                             <h5 className="card-title text-nowrap overflow-hidden">{course.name}</h5>
                                             <p className="card-text overflow-hidden" style={{ height: "100px" }}>

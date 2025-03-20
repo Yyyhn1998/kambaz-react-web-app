@@ -1,33 +1,39 @@
 import { createSlice } from "@reduxjs/toolkit";
-import * as db from "../../Database";
 
 const initialState = {
-    enrollments: db.enrollments
+    enrollments: [],
 };
 
 const enrollmentsSlice = createSlice({
     name: "enrollments",
     initialState,
     reducers: {
+        setEnrollments: (state, action) => {
+            state.enrollments = action.payload;
+        },
         enrollCourse: (state, action) => {
             const { courseId, userId } = action.payload;
-            const newEnrollment = {
-                _id: new Date().getTime().toString(),
-                user: userId,
-                course: courseId
-            };
-            state.enrollments.push(newEnrollment);
-            console.log("Enrolled:", newEnrollment, state.enrollments);
+            if (!state.enrollments.some(e => e.course === courseId && e.user === userId)) {
+                state.enrollments.push({
+                    _id: new Date().getTime().toString(),
+                    user: userId,
+                    course: courseId
+                });
+                console.log("Redux: Enrolled user in course:", courseId);
+            }
         },
         unenrollCourse: (state, action) => {
             const { courseId, userId } = action.payload;
+            console.log("Redux: Unenrolling user", userId, "from course", courseId);
+
             state.enrollments = state.enrollments.filter(
-                (enrollment) => !(enrollment.course === courseId && enrollment.user === userId)
+                (e) => !(e.course === courseId && e.user === userId)
             );
-            console.log("Unenrolled from course:", courseId, state.enrollments);
-        }
-    }
+
+            console.log("Redux: Updated enrollments", state.enrollments);
+        },
+    },
 });
 
-export const { enrollCourse, unenrollCourse } = enrollmentsSlice.actions;
+export const { setEnrollments, enrollCourse, unenrollCourse } = enrollmentsSlice.actions;
 export default enrollmentsSlice.reducer;

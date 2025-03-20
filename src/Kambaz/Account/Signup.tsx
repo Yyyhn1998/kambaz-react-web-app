@@ -44,7 +44,7 @@ export default function Signup() {
 
         db.users.push(user);
         dispatch(setCurrentUser(user));
-        navigate("/Kambaz/Dashboard");
+        navigate("/Kambaz/Account/Profile");
     };
 
     return (

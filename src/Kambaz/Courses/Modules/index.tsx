@@ -4,31 +4,52 @@ import { BsGripVertical } from "react-icons/bs";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import ModulesControls from "./ModulesControls";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { addModule, editModule, updateModule, deleteModule } from "./reducer";
-import { ModuleType } from "./types"; // Adjust path as needed
+import { setModule, addModule, editModule, updateModule, deleteModule } from "./reducer";
+import * as coursesClient from "../client";
+import * as modulesClient from "./client";
 
-// Add interface for component props
-interface ModulesProps {
-    modules?: ModuleType[];
-    setModules?: (modules: ModuleType[]) => void;
-}
-
-// Update component to accept props
-export default function Modules({ modules: propModules, setModules }: ModulesProps = {}) {
+export default function Modules() {
     const { cid } = useParams();
     const [moduleName, setModuleName] = useState("");
 
     // eslint-disable-next-line
-    const { modules: reduxModules } = useSelector((state: any) => state.modulesReducer);
+    const { modules } = useSelector((state: any) => state.modulesReducer);
+    // const { modules: reduxModules } = useSelector((state: any) => state.modulesReducer);
 
-    // Use either props modules or Redux modules
-    const modulesToUse = propModules || reduxModules;
+
+    const modulesToUse = modules.filter(module => module.course === cid)
 
     // eslint-disable-next-line
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const dispatch = useDispatch();
+    const removeModule = async (moduleId: string) => {
+        await modulesClient.deleteModule(moduleId);
+        dispatch(deleteModule(moduleId));
+    };
+
+    // eslint-disable-next-line
+    const saveModule = async (module: any) => {
+        await modulesClient.updateModule(module);
+        dispatch(updateModule(module));
+    };
+
+    const createModuleForCourse = async () => {
+        if (!cid) return;
+        const newModule = { name: moduleName, course: cid };
+        const module = await coursesClient.createModuleForCourse(cid, newModule);
+        dispatch(addModule(module));
+    };
+
+    const fetchModules = async () => {
+        const modules = await coursesClient.findModulesForCourse(cid as string);
+        dispatch(setModule(modules));
+    };
+    useEffect(() => {
+        fetchModules();
+    }, []);
+
 
     return (
         <div>
@@ -36,19 +57,7 @@ export default function Modules({ modules: propModules, setModules }: ModulesPro
                 <ModulesControls
                     moduleName={moduleName}
                     setModuleName={setModuleName}
-                    addModule={() => {
-                        dispatch(addModule({ name: moduleName, course: cid }));
-                        // If setModules prop is provided, use it
-                        if (setModules && propModules) {
-                            const newModule = {
-                                _id: Date.now().toString(),
-                                name: moduleName,
-                                course: cid || ""
-                            };
-                            setModules([...propModules, newModule]);
-                        }
-                        setModuleName("");
-                    }}
+                    addModule={createModuleForCourse}
                 />
             )}
 
@@ -56,8 +65,6 @@ export default function Modules({ modules: propModules, setModules }: ModulesPro
 
             <ListGroup className="rounded-0" id="wd-modules">
                 {modulesToUse
-                    // eslint-disable-next-line
-                    .filter((module: any) => module.course === cid)
                     // eslint-disable-next-line
                     .map((module: any) => (
                         <ListGroup.Item key={module._id} className="wd-module p-0 mb-5 fs-5 border-gray">
@@ -73,7 +80,8 @@ export default function Modules({ modules: propModules, setModules }: ModulesPro
                                             }
                                             onKeyDown={(e) => {
                                                 if (e.key === "Enter") {
-                                                    dispatch(updateModule({ ...module, editing: false }));
+                                                    saveModule({ ...module, editing: false });
+
                                                 }
                                             }}
                                             defaultValue={module.name}
@@ -84,7 +92,7 @@ export default function Modules({ modules: propModules, setModules }: ModulesPro
                                 {currentUser?.role === "FACULTY" && (
                                     <ModuleControlButtons
                                         moduleId={module._id}
-                                        deleteModule={() => dispatch(deleteModule(module._id))}
+                                        deleteModule={(moduleId) => removeModule(moduleId)}
                                         editModule={() => dispatch(editModule(module._id))}
                                     />
                                 )}

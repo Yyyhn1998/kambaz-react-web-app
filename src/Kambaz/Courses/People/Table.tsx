@@ -1,14 +1,31 @@
 import { Table } from "react-bootstrap";
 import { FaUserCircle } from "react-icons/fa";
 import { useParams } from "react-router";
-import { users, enrollments } from "../../Database";
+import { useEffect, useState } from "react";
+import * as peopleClient from "./client"; //
+
+interface UserType {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    loginId: string;
+    section: string;
+    role: string;
+    lastActivity: string;
+    totalActivity: string;
+}
 
 export default function PeopleTable() {
     const { cid } = useParams();
+    const [courseUsers, setCourseUsers] = useState<UserType[]>([]);
 
-    const courseUsers = users.filter(user =>
-        enrollments.some(enrollment => enrollment.user === user._id && enrollment.course === cid)
-    );
+    useEffect(() => {
+        if (cid) {
+            peopleClient.fetchPeopleInCourse(cid).then(setCourseUsers).catch(err => {
+                console.error("Failed to fetch people:", err);
+            });
+        }
+    }, [cid]);
 
     return (
         <div id="wd-people-table">
@@ -43,4 +60,3 @@ export default function PeopleTable() {
         </div>
     );
 }
-
