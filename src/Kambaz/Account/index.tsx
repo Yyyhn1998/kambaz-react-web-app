@@ -6,6 +6,7 @@ import { Route, Routes } from "react-router";
 import { FaUser } from "react-icons/fa";
 import {Navigate} from "react-router-dom";
 import { useSelector } from "react-redux";
+import Users from "./Users.tsx";
 
 export default function Account() {
     // eslint-disable-next-line
@@ -28,6 +29,8 @@ export default function Account() {
                         <Route path="/" element={<Navigate to={ currentUser ? "/Kambaz/Account/Profile" : "/Kambaz/Account/Signin" }/>}/>
                         <Route path="/Signin" element={<Signin />} />
                         <Route path="/Signup" element={<Signup />} />
+                        <Route path="/Users" element={<Users />} />
+                        <Route path="/Users/:uid" element={<Users />} />
                         <Route path="/Profile" element={<Profile />} />
                         <Route path="*" element={<Navigate to="Signin" replace />} />
                     </Routes>
