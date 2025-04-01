@@ -10,6 +10,9 @@ const modulesSlice = createSlice({
         setModule: (state, action) => {
             state.modules = action.payload;
         },
+        setModules: (state, { payload: modules }) => {
+            state.modules = modules;
+        },
         addModule: (state, { payload: module }) => {
             // eslint-disable-next-line
             const newModule: any = {
@@ -42,6 +45,6 @@ const modulesSlice = createSlice({
         },
     },
 });
-export const { addModule, deleteModule, updateModule, editModule , setModule } =
+export const { addModule, deleteModule, updateModule, editModule , setModule, setModules } =
     modulesSlice.actions;
 export default modulesSlice.reducer;

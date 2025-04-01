@@ -115,7 +115,7 @@ export default function Assignments() {
 
                 <ListGroup className="rounded-0">
                     {assignments.map((assignment) => (
-                        <ListGroup.Item key={assignment._id} className="wd-lesson p-3 ps-3 border-bottom">
+                        <ListGroup.Item key={assignment._id || Math.random()} className="wd-lesson p-3 ps-3 border-bottom">
                             <div className="d-flex align-items-start w-100">
                                 <BsGripVertical className="me-2 fs-3" />
                                 <AssignmentIcon className="me-3" />

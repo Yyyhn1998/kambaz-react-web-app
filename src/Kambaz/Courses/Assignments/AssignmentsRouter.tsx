@@ -9,8 +9,12 @@ export default function AssignmentsRouter() {
             <Routes>
                 <Route path="/" element={<Navigate to="assignments" />} />
                 <Route path="/assignments" element={<Assignments />} />
-
-                <Route path="/assignments/editor" element={
+                <Route path="/assignments/new" element={
+                    <ProtectedFacultyRoute>
+                        <AssignmentEditor />
+                    </ProtectedFacultyRoute>
+                } />
+                <Route path="/assignments/:aid" element={
                     <ProtectedFacultyRoute>
                         <AssignmentEditor />
                     </ProtectedFacultyRoute>
@@ -19,3 +23,4 @@ export default function AssignmentsRouter() {
         </div>
     );
 }
+

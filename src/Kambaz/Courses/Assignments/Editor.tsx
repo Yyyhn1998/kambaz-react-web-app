@@ -1,4 +1,4 @@
-import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { useState, useEffect } from "react";
@@ -11,15 +11,16 @@ export default function AssignmentEditor() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const assignments: AssignmentType[] = useSelector(
+    const assignments = useSelector(
         (state: { assignmentsReducer: { assignments: AssignmentType[] } }) =>
-            state.assignmentsReducer.assignments.filter(a => a.course === cid)
+            cid
+                ? state.assignmentsReducer.assignments.filter(a => a.course === cid)
+                : state.assignmentsReducer.assignments
     );
 
     const existingAssignment = assignments.find(a => a._id === aid);
 
-    // eslint-disable-next-line
-    const { currentUser } = useSelector((state: any) => state.accountReducer);
+    //const { currentUser } = useSelector((state: any) => state.accountReducer);
 
     const [formData, setFormData] = useState({
         title: "",
@@ -45,7 +46,7 @@ export default function AssignmentEditor() {
             }
         };
         fetchAssignments();
-    }, [dispatch]);
+    }, [dispatch, cid]);
 
     useEffect(() => {
         if (existingAssignment) {
@@ -71,12 +72,29 @@ export default function AssignmentEditor() {
 
     const handleSave = async () => {
         try {
-            if (existingAssignment) {
-                await assignmentsClient.updateAssignment(existingAssignment._id, formData);
-                dispatch(updateAssignment({ ...formData, _id: existingAssignment._id }));
+            console.log("aid from URL:", aid);
+            console.log("Existing assignment:", existingAssignment);
+
+            if (aid && existingAssignment) {
+                console.log("Updating assignment with id:", existingAssignment._id);
+
+                const updatedAssignment = {
+                    ...formData,
+                    _id: existingAssignment._id,
+                    course: cid
+                };
+
+                await assignmentsClient.updateAssignment(existingAssignment._id, updatedAssignment);
+                dispatch(updateAssignment(updatedAssignment));
+                console.log("Assignment updated successfully");
             } else {
-                const newAssignment = await assignmentsClient.createAssignment({ ...formData, course: cid })
+                console.log("Creating new assignment");
+                const newAssignment = await assignmentsClient.createAssignment({
+                    ...formData,
+                    course: cid
+                });
                 dispatch(addAssignment(newAssignment));
+                console.log("New assignment created:", newAssignment);
             }
 
             const updatedAssignments = await assignmentsClient.fetchAllAssignments();
@@ -87,10 +105,6 @@ export default function AssignmentEditor() {
             console.error("Failed to save assignment", error);
         }
     };
-
-    if (!currentUser || currentUser.role !== "FACULTY") {
-        return <Navigate to={`/Kambaz/Courses/${cid}/Assignments`} />;
-    }
 
     return (
         <Container className="mt-4">

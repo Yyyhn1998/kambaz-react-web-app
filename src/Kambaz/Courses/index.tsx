@@ -5,9 +5,10 @@ import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
 import { Route, Routes, useParams, useLocation } from "react-router";
 import { FaAlignJustify } from "react-icons/fa";
-import PeopleTable from "./People/Table.tsx";
+//import PeopleTable from "./People/Table.tsx";
 import {useState} from "react";
 import * as db from "../Database";
+import CoursePeople from "./CoursePeople.tsx";
 
 
 // eslint-disable-next-line
@@ -48,7 +49,7 @@ export default function Courses({ courses }: { courses: any[]; }) {
                         } />
                         <Route path="Assignments" element={<Assignments />} />
                         <Route path="Assignments/:aid" element={<AssignmentEditor />} />
-                        <Route path="People" element={<PeopleTable />} />
+                        <Route path="People" element={<CoursePeople />} />
                     </Routes>
                 </div>
             </div>

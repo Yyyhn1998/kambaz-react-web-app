@@ -6,7 +6,7 @@ import ModuleControlButtons from "./ModuleControlButtons";
 import ModulesControls from "./ModulesControls";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setModule, addModule, editModule, updateModule, deleteModule } from "./reducer";
+import { addModule, editModule, updateModule, deleteModule, setModules } from "./reducer";
 import * as coursesClient from "../client";
 import * as modulesClient from "./client";
 
@@ -15,6 +15,18 @@ export default function Modules(props: any) {
     void props;
     const { cid } = useParams();
     const [moduleName, setModuleName] = useState("");
+
+    const deleteModuleHandler = async (moduleId: string) => {
+        await modulesClient.deleteModule(moduleId);
+        dispatch(deleteModule(moduleId));
+    };
+
+    // eslint-disable-next-line
+    const updateModuleHandler = async (module: any) => {
+        await modulesClient.updateModule(module);
+        dispatch(updateModule(module));
+    };
+
 
     // eslint-disable-next-line
     const { modules } = useSelector((state: any) => state.modulesReducer);
@@ -25,41 +37,58 @@ export default function Modules(props: any) {
     // eslint-disable-next-line
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const dispatch = useDispatch();
+    const addModuleHandler = async () => {
+        const newModule = await coursesClient.createModuleForCourse(cid!, {
+            name: moduleName,
+            course: cid,
+        });
+        dispatch(addModule(newModule));
+        setModuleName("");
+    };
 
-    const removeModule = async (moduleId: string) => {
+    const fetchModulesForCourse = async () => {
+        const modules = await coursesClient.findModulesForCourse(cid!);
+        dispatch(setModules(modules));
+    };
+    useEffect(() => {
+        fetchModulesForCourse();
+    }, [cid]);
+
+    /*  const removeModule = async (moduleId: string) => {
         await modulesClient.deleteModule(moduleId);
         dispatch(deleteModule(moduleId));
-    };
+    }; */
 
-    // eslint-disable-next-line
-    const saveModule = async (module: any) => {
-        await modulesClient.updateModule(module);
-        dispatch(updateModule(module));
-    };
 
-    const createModuleForCourse = async () => {
-        if (!cid) return;
-        const newModule = { name: moduleName, course: cid };
-        const module = await coursesClient.createModuleForCourse(cid, newModule);
-        dispatch(addModule(module));
-    };
+    /* const saveModule = async (module: any) => {
+         await modulesClient.updateModule(module);
+         dispatch(updateModule(module));
+     };*/
 
-    const fetchModules = async () => {
-        const modules = await coursesClient.findModulesForCourse(cid as string);
-        dispatch(setModule(modules));
-    };
+     /* const createModuleForCourse = async () => {
+          if (!cid) return;
+          const newModule = { name: moduleName, course: cid };
+          const module = await coursesClient.createModuleForCourse(cid, newModule);
+          dispatch(addModule(module));
+      }; */
 
-    useEffect(() => {
-        fetchModules();
-    }, []);
+     /*const fetchModules = async () => {
+         const modules = await coursesClient.findModulesForCourse(cid as string);
+         dispatch(setModule(modules));
+     };
+
+     useEffect(() => {
+         fetchModules();
+     }, []); */
 
     return (
         <div>
             {currentUser?.role === "FACULTY" && (
                 <ModulesControls
+                    addModule={addModuleHandler}
                     moduleName={moduleName}
                     setModuleName={setModuleName}
-                    addModule={createModuleForCourse}
+                    //addModule={createModuleForCourse}
                 />
             )}
 
@@ -78,11 +107,10 @@ export default function Modules(props: any) {
                                         <FormControl
                                             className="w-50 d-inline-block"
                                             onChange={(e) =>
-                                                dispatch(updateModule({ ...module, name: e.target.value }))
-                                            }
+                                                updateModuleHandler({ ...module, name: e.target.value }) }
                                             onKeyDown={(e) => {
                                                 if (e.key === "Enter") {
-                                                    saveModule({ ...module, editing: false });
+                                                    updateModuleHandler({ ...module, editing: false });
                                                 }
                                             }}
                                             defaultValue={module.name}
@@ -93,7 +121,7 @@ export default function Modules(props: any) {
                                 {currentUser?.role === "FACULTY" && (
                                     <ModuleControlButtons
                                         moduleId={module._id}
-                                        deleteModule={(moduleId) => removeModule(moduleId)}
+                                        deleteModule={(moduleId) => deleteModuleHandler(moduleId)}
                                         editModule={() => dispatch(editModule(module._id))}
                                     />
                                 )}
