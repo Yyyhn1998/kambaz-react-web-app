@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCurrentUser } from "./reducer";
-import * as db from "../Database";
+//import * as db from "../Database";
 import { Form, Button, Container } from "react-bootstrap";
-import { UserType } from "./types"
+//import { UserType } from "./types"
+import * as client from "./client";
 
 export default function Signup() {
     const [newUser, setNewUser] = useState({
@@ -15,37 +16,22 @@ export default function Signup() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const signup = () => {
+    const signup = async () => {
         if (!newUser.username || !newUser.password) {
             alert("Please enter both username and password.");
             return;
         }
 
-        const existingUser = db.users.find((u: UserType) => u.username === newUser.username);
-        if (existingUser) {
+        try {
+            const user = await client.signup(newUser);
+            dispatch(setCurrentUser(user));
+            navigate("/Kambaz/Account/Profile");
+            // eslint-disable-next-line
+        } catch (e: any) {
             alert("Username already exists. Please choose another one.");
-            return;
         }
-
-        const user: UserType = {
-            _id: Date.now().toString(),
-            username: newUser.username,
-            password: newUser.password,
-            firstName: "",
-            lastName: "",
-            email: "",
-            dob: "",
-            role: "STUDENT",
-            loginId: Date.now().toString(), // Or any default value
-            section: "",
-            lastActivity: new Date().toISOString(),
-            totalActivity: "0"
-        };
-
-        db.users.push(user);
-        dispatch(setCurrentUser(user));
-        navigate("/Kambaz/Account/Profile");
     };
+
 
     return (
         <Container className="d-flex justify-content-center mt-5">
