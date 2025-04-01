@@ -119,20 +119,20 @@ export default function Kambaz() {
         }
     };
 
-    useEffect(() => {
+    /*useEffect(() => {
         if (currentUser) {
             fetchCourses();
         }
-    }, [currentUser]);
+    }, [currentUser]); */
 
 
     useEffect(() => {
-        if (currentUser) {
-            if (enrolling) {
-                fetchCourses();
-            } else {
-                findCoursesForUser();
-            }
+        if (!currentUser) return;
+
+        if (enrolling) {
+            fetchCourses();
+        } else {
+            findCoursesForUser();
         }
     }, [currentUser, enrolling]);
 
