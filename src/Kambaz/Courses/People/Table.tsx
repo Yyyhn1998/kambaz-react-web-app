@@ -30,8 +30,8 @@ export default function PeopleTable({ users = [] }: { users?: any[] }) {
             peopleClient
                 .fetchPeopleInCourse(cid)
                 .then(data => {
-                    // 过滤掉null和undefined值，并确保每个用户有_id属性
-                    const validUsers = data?.filter(user => user && user._id) || [];
+                    // eslint-disable-next-line
+                    const validUsers = data?.filter((user: any) => user && user._id) || [];
                     setCourseUsers(validUsers);
                     setLoading(false);
                 })
@@ -64,7 +64,8 @@ export default function PeopleTable({ users = [] }: { users?: any[] }) {
                 </tr>
                 </thead>
                 <tbody>
-                {displayedUsers.map((user) => (
+                {/*eslint-disable-next-line*/}
+                {displayedUsers.map((user: any) => (
                     user && user._id ? (
                         <tr key={user._id}>
                             <td className="d-flex align-items-center gap-2">
