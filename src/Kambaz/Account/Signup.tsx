@@ -2,15 +2,14 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCurrentUser } from "./reducer";
-//import * as db from "../Database";
 import { Form, Button, Container } from "react-bootstrap";
-//import { UserType } from "./types"
 import * as client from "./client";
 
 export default function Signup() {
     const [newUser, setNewUser] = useState({
         username: "",
         password: "",
+        role: "STUDENT",
     });
 
     const dispatch = useDispatch();
@@ -32,7 +31,6 @@ export default function Signup() {
         }
     };
 
-
     return (
         <Container className="d-flex justify-content-center mt-5">
             <div className="w-25">
@@ -44,7 +42,10 @@ export default function Signup() {
                             placeholder="Username"
                             value={newUser.username}
                             onChange={(e) =>
-                                setNewUser((prev) => ({ ...prev, username: e.target.value }))
+                                setNewUser((prev) => ({
+                                    ...prev,
+                                    username: e.target.value,
+                                }))
                             }
                         />
                     </Form.Group>
@@ -54,9 +55,26 @@ export default function Signup() {
                             placeholder="Password"
                             value={newUser.password}
                             onChange={(e) =>
-                                setNewUser((prev) => ({ ...prev, password: e.target.value }))
+                                setNewUser((prev) => ({
+                                    ...prev,
+                                    password: e.target.value,
+                                }))
                             }
                         />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Select
+                            value={newUser.role}
+                            onChange={(e) =>
+                                setNewUser((prev) => ({
+                                    ...prev,
+                                    role: e.target.value,
+                                }))
+                            }
+                        >
+                            <option value="STUDENT">Student</option>
+                            <option value="FACULTY">Faculty</option>
+                        </Form.Select>
                     </Form.Group>
                     <Button variant="primary" className="w-100" onClick={signup}>
                         Sign up
