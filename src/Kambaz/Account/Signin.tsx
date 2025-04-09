@@ -71,13 +71,13 @@ export default function Signin() {
                     <ul>
                         <li>
                             <strong>React.js Project:</strong>{" "}
-                            <a href="github.com/Yyyhn1998/kambaz-react-web-app" target="_blank" rel="noopener noreferrer">
+                            <a href="https://github.com/Yyyhn1998/kambaz-react-web-app">
                                 GitHub Repository - Kambaz React Web App
                             </a>
                         </li>
                         <li>
                             <strong>Node.js Project:</strong>{" "}
-                            <a href="github.com/Yyyhn1998/kambaz-node-server-app" target="_blank" rel="noopener noreferrer">
+                            <a href="https://github.com/Yyyhn1998/kambaz-node-server-app">
                                 GitHub Repository - Kambaz Node Server App
                             </a>
                         </li>
